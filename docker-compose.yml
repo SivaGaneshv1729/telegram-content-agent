@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  agent:
+    build: .
+    env_file:
+      - .env
+    volumes:
+      - agent-db:/app/data
+      # To test locally without rebuilding:
+      # - ./src:/app/src
+    restart: unless-stopped
+    healthcheck:
+      # We don't have a web server since it's long polling, so we check if the process is running.
+      test: ["CMD", "ps", "aux", "|", "grep", "python src/main.py", "|", "grep", "-v", "grep"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  agent-db:
