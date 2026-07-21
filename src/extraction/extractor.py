@@ -8,6 +8,10 @@ import trafilatura
 from markitdown import MarkItDown
 
 def is_url(text: str) -> bool:
+    """
+    Validates if a given string is a properly formatted URL.
+    Returns True if it has a scheme and netloc.
+    """
     try:
         result = urllib.parse.urlparse(text)
         return all([result.scheme, result.netloc])
@@ -15,10 +19,17 @@ def is_url(text: str) -> bool:
         return False
 
 def generate_hash(text: str) -> str:
+    """
+    Generates a SHA-256 hash for a given text to act as a unique identifier 
+    for idempotency checks.
+    """
     return hashlib.sha256(text.encode('utf-8')).hexdigest()
 
 async def extract_content(update: Update, context: ContextTypes.DEFAULT_TYPE) -> tuple[str, str, str]:
     """
+    Inspects the incoming Telegram message and extracts clean text based on the format.
+    Handles Raw Text, URLs (via trafilatura), and PDF Documents (via markitdown).
+    
     Returns a tuple: (content_type, source_id, extracted_text)
     """
     message = update.message

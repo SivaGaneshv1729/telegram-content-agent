@@ -9,9 +9,18 @@ from llm.orchestrator import generate_content
 logger = logging.getLogger(__name__)
 
 async def start_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Handles the /start command.
+    Sends a welcome message explaining the bot's capabilities.
+    """
     await update.message.reply_text("Welcome to the Content Team Agent! Send me text, links, or PDFs, and I'll process them for you.")
 
 async def setstyle_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Handles the /setstyle command.
+    Extracts the user's desired style from the command arguments and saves it
+    persistently in the SQLite database to be used in future LLM generations.
+    """
     user_id = update.message.from_user.id
     # The style description is everything after /setstyle
     style_description = " ".join(context.args)
@@ -24,6 +33,12 @@ async def setstyle_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(f"Style preference saved: '{style_description}'")
 
 async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Main message handler for incoming content.
+    Routes the message to the appropriate extractor (Text/URL/PDF), checks for 
+    duplicates via the Google Sheets integration, processes the content via the LLM, 
+    and appends the generated drafts to Google Sheets.
+    """
     user_id = update.message.from_user.id
     
     try:

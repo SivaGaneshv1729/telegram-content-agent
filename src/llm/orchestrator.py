@@ -31,6 +31,10 @@ You MUST return ONLY valid JSON matching this schema exactly:
 """
 
 def generate_with_groq(prompt: str) -> str:
+    """
+    Sends the system prompt and formatted user prompt to the Groq API using 
+    the Llama 3.1 8B instant model. Configured to enforce JSON object response format.
+    """
     try:
         completion = groq_client.chat.completions.create(
             model="llama-3.1-8b-instant",
@@ -47,6 +51,10 @@ def generate_with_groq(prompt: str) -> str:
         return ""
 
 def generate_with_ollama(prompt: str) -> str:
+    """
+    Sends the prompt to a local Ollama instance running the llama3.1 model. 
+    Uses the `format: "json"` parameter to constrain output.
+    """
     try:
         response = requests.post(
             OLLAMA_URL,
@@ -66,6 +74,14 @@ def generate_with_ollama(prompt: str) -> str:
         return ""
 
 def generate_content(raw_content: str, style_prompt: str = "") -> dict:
+    """
+    Orchestrates the LLM generation process.
+    Constructs the final prompt by combining the raw content and optional user style guide.
+    Implements a retry mechanism with exponential backoff if the returned string is not valid JSON 
+    or misses required schema fields.
+    
+    Returns a dictionary matching the schema, or an empty dictionary if failed.
+    """
     prompt = f"Source Content:\n{raw_content}\n"
     if style_prompt:
         prompt += f"\nApply the following style guide to all generated variants: {style_prompt}"
